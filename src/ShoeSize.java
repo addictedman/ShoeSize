@@ -1,37 +1,42 @@
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+
 
 /* ShoeSize - Eric McCreath 2015 - GPL
  * This class stores a persons shoe size.
  */
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 public class ShoeSize {
 	private static final String SHOESIZEENAME = "SHOESIZE";
 	public static final int SHOESIZEMAX = 15;
 	public static final int SHOESIZEMIN = 3;
+	private static String SHOESIZE = "sss";
+	static final String FILENAME = "shoesize.json";
 
-	final static String FILENAME = "Shoesize.txt";
 
-	private Integer shoesize;
-	public static Map<String, ShoeSize> data;
-	public static ShoeSize shoeSize;
+	private static Long shoesize;
 
 	public ShoeSize() {
 		shoesize = null;
+
 	}
 
 	public String show() {
 		return (shoesize == null ? "" : shoesize.toString());
 	}
 
-	public boolean set(Integer v) {
+	public boolean set(Long v) {
 		if (v == null || v >= ShoeSize.SHOESIZEMIN && v <= ShoeSize.SHOESIZEMAX) {
 			shoesize = v;
-			save(data,FILENAME);
+			save(FILENAME);
+
 			return true;
 		} else {
 			shoesize = null;
@@ -39,79 +44,33 @@ public class ShoeSize {
 		}
 	}
 
-	public static ShoeSize load(String filePath) {
-		// add code here that will load shoe size from a file called "FILENAME"
-		try {BufferedReader b_reader = new BufferedReader(new FileReader(filePath));
-			// read in line and test if null
-			String line;
+	static ShoeSize load(String filename) {
+		File f = new File(filename);
+		ShoeSize res = new ShoeSize();
+		try {
+			JSONObject obj = (JSONObject) JSONValue.parse(new FileReader(f));
+			res.shoesize = (Long) obj.get(SHOESIZE);
 
-			// a dictionary like structure for holding our student data
-			data = new HashMap<String, ShoeSize>();
-
-
-			while((line = b_reader.readLine()) != null){
-				System.out.println(line);
-				// break string into array
-				// put data into new Student object
-				ShoeSize shoeSize = new ShoeSize();
-
-				// generate unique identifier
-				String uniqueID =  UUID.randomUUID().toString();
-
-				// ensure uniqueID not in hashmap
-				while(data.containsKey(uniqueID)){
-					uniqueID = UUID.randomUUID().toString();
-				}
-
-				// place data into hashmap
-				data.put(uniqueID, shoeSize);
-
-			}
-			// release system resources
-			b_reader.close();
-
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
-		catch (IOException x) {
-			System.err.format("IOException: %s%n", x);
-		}
-		return shoeSize;
+		return res;
+
 	}
 
-
-	public void save(Map<String, ShoeSize> size,String filePath) {
-		// add code here that will save shoe size into a file called "FILENAME"
-		// try-with-resource-statement since Java 7
-
-		try{
-			BufferedWriter b_writer = new BufferedWriter(new FileWriter(filePath));
-
-			for (Map.Entry<String, ShoeSize> entry : size.entrySet()) {
-				String key = entry.getKey();
-				ShoeSize shoeSize = entry.getValue();
-
-				String line = shoeSize.shoesize.toString();
-
-				// debug code
-				System.out.println(line);
-
-				// write single student data to file
-				b_writer.write(line);
-				// insert linebreak
-				b_writer.newLine();
-
-
-			}
-
-			// release system resources
-			b_writer.close();
-		}
-		catch (IOException x) {
-			System.err.format("IOException: %s%n", x);
+	void save(String filename) {
+		File f = new File(filename);
+		JSONObject obj = new JSONObject();
+		obj.put(SHOESIZE, shoesize);
+		System.out.println(shoesize);
+		FileWriter out;
+		try {
+			out = new FileWriter(f);
+			obj.writeJSONString(out);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 	}
-	public Map<String, ShoeSize> getShoeSize(){
-		return data;
-	}
-
 }
