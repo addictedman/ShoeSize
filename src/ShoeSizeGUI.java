@@ -1,3 +1,4 @@
+
 import java.awt.Color;
 
 import javax.swing.JFrame;
@@ -10,7 +11,7 @@ import javax.swing.event.DocumentListener;
 /* ShoeSizeGUI - Eric McCreath 2015 - GPL
  * Uses a Swing GUI to display/edit a persons shoe size. */
 
-public class ShoeSizeGUI extends ShoeSize{
+public class ShoeSizeGUI  extends ShoeSize{
 
 	private static final int SHOESIZETEXTFIELDWIDTH = 5;
 
@@ -70,10 +71,9 @@ public class ShoeSizeGUI extends ShoeSize{
 	public static void main(String[] args) {
 		ShoeSizeGUI sc = new ShoeSizeGUI();
 		ShoeSize data = new ShoeSize();
-		data.save(FILENAME);
-		ShoeSize dataload = load(FILENAME);
+		data.save("shoesize.xml");
+		ShoeSize dataload = load("shoesize.xml");
 		dataload.show();
 
-
 	}
-}
+} 

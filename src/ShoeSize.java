@@ -1,28 +1,29 @@
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.UUID;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /* ShoeSize - Eric McCreath 2015 - GPL
  * This class stores a persons shoe size.
  */
 
 public class ShoeSize {
-
-
+	private static final String SHOE = "SHOE";
 	private static final String SHOESIZEENAME = "SHOESIZE";
 	public static final int SHOESIZEMAX = 15;
 	public static final int SHOESIZEMIN = 3;
 
-	static final String FILENAME = "shoesize.txt";
+	static final String FILENAME = "shoesize.xml";
 
 	private Integer shoesize;
 
@@ -45,18 +46,30 @@ public class ShoeSize {
 		}
 	}
 
-	static public ShoeSize load(String filename) {
+	static ShoeSize load(String filename) {
+		File f = new File(filename);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db;
 		ShoeSize res = new ShoeSize();
+
 		try {
-			BufferedReader lr = Files.newBufferedReader(
-					new File(filename).toPath(), Charset.forName("US-ASCII"));
+// load the xml tree
+			db = dbf.newDocumentBuilder();
+			Document doc = db.parse(f);
 
-			int line = lr.read();
+// parse the tree and obtain the person info
+			Node person = doc.getFirstChild();
 
-			res.shoesize = line;
+			NodeList nl = person.getChildNodes();
+			for (int i =0;i< nl.getLength();i++) {
+				Node n = nl.item(i);
+				if (n.getNodeName().equals(SHOESIZEENAME)) {
+					res.shoesize = Integer.parseInt(n.getTextContent());
+				}
+			}
 
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			System.err.println("Problem loading " + filename);
 		}
 		return res;
 
@@ -64,19 +77,37 @@ public class ShoeSize {
 
 	void save(String filename) {
 
+		File f = new File(filename);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db;
 		try {
-			BufferedWriter lw = Files.newBufferedWriter(
-					new File(filename).toPath(), Charset.forName("US-ASCII"));
+// make the xml tree
+			db = dbf.newDocumentBuilder();
+			Document doc = db.newDocument();
+			Element person = doc.createElement(SHOE);
 
-			lw.write(shoesize);
 
-			lw.newLine();
-			lw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+			Element ea = doc.createElement(SHOESIZEENAME);
+			ea.appendChild(doc.createTextNode(Integer.toString(shoesize)));
+			person.appendChild(ea);
+
+			doc.appendChild(person);
+// save the xml file
+			TransformerFactory transformerFactory = TransformerFactory
+					.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+
+// set xml encoding to utf-8
+			transformer.setOutputProperty(OutputKeys.ENCODING,"utf-8");
+
+			DOMSource source = new DOMSource(doc);
+			StreamResult result = new StreamResult(f);
+			transformer.transform(source, result);
+		} catch (Exception e) {
+			System.err.println("Problem saving " + filename);
 		}
-
-
 
 	}
 }
+
+
