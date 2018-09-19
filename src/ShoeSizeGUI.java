@@ -7,7 +7,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-/* ShoeSizeGUI - Eric McCreath 2015 - GPL 
+/* ShoeSizeGUI - Eric McCreath 2015 - GPL
  * Uses a Swing GUI to display/edit a persons shoe size. */
 
 public class ShoeSizeGUI extends ShoeSize{
@@ -72,6 +72,7 @@ public class ShoeSizeGUI extends ShoeSize{
 		ShoeSize data = new ShoeSize();
 		data.save(FILENAME);
 		ShoeSize dataload = load(FILENAME);
+		dataload.show();
 
 
 	}

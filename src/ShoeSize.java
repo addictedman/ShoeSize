@@ -1,16 +1,28 @@
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.UUID;
 
-/* ShoeSize - Eric McCreath 2015 - GPL 
+/* ShoeSize - Eric McCreath 2015 - GPL
  * This class stores a persons shoe size.
  */
 
-import java.io.*;
+public class ShoeSize {
 
-public class ShoeSize implements Serializable{
+
 	private static final String SHOESIZEENAME = "SHOESIZE";
 	public static final int SHOESIZEMAX = 15;
 	public static final int SHOESIZEMIN = 3;
 
-	static final String FILENAME = "shoesize.ser";
+	static final String FILENAME = "shoesize.txt";
 
 	private Integer shoesize;
 
@@ -33,36 +45,38 @@ public class ShoeSize implements Serializable{
 		}
 	}
 
-
-
-
-	static ShoeSize load(String filename) {
-                // add code here that will load shoe size from a file called "FILENAME"
-		ShoeSize res = null;
+	static public ShoeSize load(String filename) {
+		ShoeSize res = new ShoeSize();
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
-					filename));
-			res = (ShoeSize) ois.readObject();
-			ois.close();
+			BufferedReader lr = Files.newBufferedReader(
+					new File(filename).toPath(), Charset.forName("US-ASCII"));
+
+			int line = lr.read();
+
+			res.shoesize = line;
+
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 		}
-
 		return res;
+
 	}
 
 	void save(String filename) {
-		// add code here that will save shoe size into a file called "FILENAME
+
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(
-					new FileOutputStream(filename));
-			oos.writeObject(this);
-			oos.close();
+			BufferedWriter lw = Files.newBufferedWriter(
+					new File(filename).toPath(), Charset.forName("US-ASCII"));
+
+			lw.write(shoesize);
+
+			lw.newLine();
+			lw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+
 
 	}
 }
