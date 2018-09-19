@@ -1,5 +1,6 @@
-
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -11,7 +12,7 @@ import javax.swing.event.DocumentListener;
 /* ShoeSizeGUI - Eric McCreath 2015 - GPL
  * Uses a Swing GUI to display/edit a persons shoe size. */
 
-public class ShoeSizeGUI  extends ShoeSize{
+public class ShoeSizeGUI extends ShoeSize{
 
 	private static final int SHOESIZETEXTFIELDWIDTH = 5;
 
@@ -23,7 +24,7 @@ public class ShoeSizeGUI  extends ShoeSize{
 
 	public ShoeSizeGUI() {
 
-		shoesize = ShoeSize.load(FILENAME);
+		shoesize=ShoeSize.load(FILENAME);
 
 		jframe = new JFrame("Shoe Size");
 		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -69,11 +70,16 @@ public class ShoeSizeGUI  extends ShoeSize{
 	}
 
 	public static void main(String[] args) {
-		ShoeSizeGUI sc = new ShoeSizeGUI();
-		ShoeSize data = new ShoeSize();
-		data.save("shoesize.xml");
-		ShoeSize dataload = load("shoesize.xml");
-		dataload.show();
 
+		// read in data from file
+		System.out.println("loading");
+		ShoeSize bespoke = new ShoeSize();
+		bespoke.load(FILENAME);
+		// Get data for writing to file
+		Map<String,ShoeSize> a = bespoke.getShoeSize();
+		System.out.println("saving");
+		// write to file
+		bespoke.save(a,FILENAME);
+		ShoeSizeGUI sc = new ShoeSizeGUI();
 	}
-} 
+}

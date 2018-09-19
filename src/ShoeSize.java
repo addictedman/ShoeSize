@@ -1,31 +1,24 @@
-import java.io.File;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /* ShoeSize - Eric McCreath 2015 - GPL
  * This class stores a persons shoe size.
  */
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class ShoeSize {
-	private static final String SHOE = "SHOE";
 	private static final String SHOESIZEENAME = "SHOESIZE";
 	public static final int SHOESIZEMAX = 15;
 	public static final int SHOESIZEMIN = 3;
 
-	static final String FILENAME = "shoesize.xml";
+	final static String FILENAME = "Shoesize.txt";
 
 	private Integer shoesize;
+	public static Map<String, ShoeSize> data;
+	public static ShoeSize shoeSize;
 
 	public ShoeSize() {
 		shoesize = null;
@@ -38,7 +31,7 @@ public class ShoeSize {
 	public boolean set(Integer v) {
 		if (v == null || v >= ShoeSize.SHOESIZEMIN && v <= ShoeSize.SHOESIZEMAX) {
 			shoesize = v;
-			save(FILENAME);
+			save(data,FILENAME);
 			return true;
 		} else {
 			shoesize = null;
@@ -46,68 +39,79 @@ public class ShoeSize {
 		}
 	}
 
-	static ShoeSize load(String filename) {
-		File f = new File(filename);
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db;
-		ShoeSize res = new ShoeSize();
+	public static ShoeSize load(String filePath) {
+		// add code here that will load shoe size from a file called "FILENAME"
+		try {BufferedReader b_reader = new BufferedReader(new FileReader(filePath));
+			// read in line and test if null
+			String line;
 
-		try {
-// load the xml tree
-			db = dbf.newDocumentBuilder();
-			Document doc = db.parse(f);
+			// a dictionary like structure for holding our student data
+			data = new HashMap<String, ShoeSize>();
 
-// parse the tree and obtain the person info
-			Node person = doc.getFirstChild();
 
-			NodeList nl = person.getChildNodes();
-			for (int i =0;i< nl.getLength();i++) {
-				Node n = nl.item(i);
-				if (n.getNodeName().equals(SHOESIZEENAME)) {
-					res.shoesize = Integer.parseInt(n.getTextContent());
+			while((line = b_reader.readLine()) != null){
+				System.out.println(line);
+				// break string into array
+				// put data into new Student object
+				ShoeSize shoeSize = new ShoeSize();
+
+				// generate unique identifier
+				String uniqueID =  UUID.randomUUID().toString();
+
+				// ensure uniqueID not in hashmap
+				while(data.containsKey(uniqueID)){
+					uniqueID = UUID.randomUUID().toString();
 				}
+
+				// place data into hashmap
+				data.put(uniqueID, shoeSize);
+
+			}
+			// release system resources
+			b_reader.close();
+
+		}
+		catch (IOException x) {
+			System.err.format("IOException: %s%n", x);
+		}
+		return shoeSize;
+	}
+
+
+	public void save(Map<String, ShoeSize> size,String filePath) {
+		// add code here that will save shoe size into a file called "FILENAME"
+		// try-with-resource-statement since Java 7
+
+		try{
+			BufferedWriter b_writer = new BufferedWriter(new FileWriter(filePath));
+
+			for (Map.Entry<String, ShoeSize> entry : size.entrySet()) {
+				String key = entry.getKey();
+				ShoeSize shoeSize = entry.getValue();
+
+				String line = shoeSize.shoesize.toString();
+
+				// debug code
+				System.out.println(line);
+
+				// write single student data to file
+				b_writer.write(line);
+				// insert linebreak
+				b_writer.newLine();
+
+
 			}
 
-		} catch (Exception e) {
-			System.err.println("Problem loading " + filename);
+			// release system resources
+			b_writer.close();
 		}
-		return res;
-
-	}
-
-	void save(String filename) {
-
-		File f = new File(filename);
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db;
-		try {
-// make the xml tree
-			db = dbf.newDocumentBuilder();
-			Document doc = db.newDocument();
-			Element person = doc.createElement(SHOE);
-
-
-			Element ea = doc.createElement(SHOESIZEENAME);
-			ea.appendChild(doc.createTextNode(Integer.toString(shoesize)));
-			person.appendChild(ea);
-
-			doc.appendChild(person);
-// save the xml file
-			TransformerFactory transformerFactory = TransformerFactory
-					.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-
-// set xml encoding to utf-8
-			transformer.setOutputProperty(OutputKeys.ENCODING,"utf-8");
-
-			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(f);
-			transformer.transform(source, result);
-		} catch (Exception e) {
-			System.err.println("Problem saving " + filename);
+		catch (IOException x) {
+			System.err.format("IOException: %s%n", x);
 		}
 
 	}
+	public Map<String, ShoeSize> getShoeSize(){
+		return data;
+	}
+
 }
-
-
